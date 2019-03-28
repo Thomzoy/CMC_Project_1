@@ -54,15 +54,17 @@ def exercise1a():
     # You can still access the muscle inside the system by doing
     # >>> sys.muscle.L_OPT # To get the muscle optimal length
 
-    # Evalute for a single muscle stretch
+
+    # Force-length curves
+
+    # Evalute for various muscle stretch
     stretch_min = muscle.L_OPT
     stretch_max = muscle.L_OPT*3
     N_stretch = 40
     muscle_stretch = np.arange(stretch_min, stretch_max, (stretch_max-stretch_min)/N_stretch)
 
-    # Evalute for a single muscle stimulation
-    
-    N_stim = 3
+    # Evalute for various muscle stimulation
+    N_stim = 3 
     muscle_stimulation = np.arange(0., 1.01, 1/N_stim)
 
     # Set the initial condition
@@ -76,6 +78,7 @@ def exercise1a():
     time_step = 0.001
     time = np.arange(t_start, t_stop, time_step)
     
+    # Plotting
     colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
     plt.figure('Isometric muscle experiment') 
     
@@ -96,17 +99,20 @@ def exercise1a():
             passiveF[stretch] = result.passive_force[-1]
             tendonF[stretch] = result.tendon_force[-1]
             
-        # Plotting
         color = colors[stim]
         plt.plot(muscle_stretch*100/muscle.L_OPT, activeF, 'o' + color)
         plt.plot(muscle_stretch*100/muscle.L_OPT, passiveF, '+' + color)
-        plt.plot(muscle_stretch*100/muscle.L_OPT, tendonF, color, label='stim = ' + str(round(muscle_stimulation[stim], 3)))
+        plt.plot(muscle_stretch*100/muscle.L_OPT, tendonF, color, label='stim = ' + str(round(muscle_stimulation[stim], 2)))
     
     plt.title('Isometric muscle experiment')
     plt.xlabel('Contractile element length [%]')
     plt.ylabel('Force [N]')
     plt.legend()
     plt.grid()
+    
+    
+    # Fiber length influence
+    
 
 
 def exercise1d():
