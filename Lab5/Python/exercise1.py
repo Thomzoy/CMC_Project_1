@@ -43,8 +43,6 @@ def exercise1a():
     # Create muscle object
     muscle = Muscle(parameters)
 
-    pylog.warning("Isometric muscle contraction to be completed")
-
     # Instatiate isometric muscle system
     sys = IsometricMuscleSystem()
 
@@ -59,14 +57,16 @@ def exercise1a():
 
     # Evalute for various muscle stretch
     stretch_min = muscle.L_OPT
-    stretch_max = muscle.L_OPT*3
+    stretch_max = muscle.L_OPT*2.8
     N_stretch = 40
     muscle_stretch = np.arange(stretch_min, stretch_max, (stretch_max-stretch_min)/N_stretch)
 
     # Evalute for various muscle stimulation
-    N_stim = 3 
-    muscle_stimulation = np.arange(0., 1.01, 1/N_stim)
-
+    stim_min = 0.
+    stim_max = 1.5
+    N_stim = 4
+    #muscle_stimulation = np.arange(stim_min, stim_max, (stim_max-stim_min)/N_stim)
+    muscle_stimulation = np.array([0,0.3,0.6,1])
     # Set the initial condition
     x0 = [0.0, sys.muscle.L_OPT]
     # x0[0] --> muscle stimulation intial value
@@ -78,41 +78,71 @@ def exercise1a():
     time_step = 0.001
     time = np.arange(t_start, t_stop, time_step)
     
-    # Plotting
-    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
-    plt.figure('Isometric muscle experiment') 
+    activeF = np.zeros(N_stretch)
+    passiveF = np.zeros(N_stretch)
+    tendonF = np.zeros(N_stretch)
     
-    for stim in range (len(muscle_stimulation)):
+    # Plotting
+    n_subplot = int((np.sqrt(len(muscle_stimulation)-1))+1)
+
+    fig, axes = plt.subplots(n_subplot,n_subplot)
+
+    for i,stim in enumerate(muscle_stimulation):
+        plt.subplot(n_subplot,n_subplot,i+1)
         
-        activeF = np.zeros(N_stretch)
-        passiveF = np.zeros(N_stretch)
-        tendonF = np.zeros(N_stretch)
         
+        for index_strech,stretch in enumerate(muscle_stretch):
+            # Run the integration
+            result = sys.integrate(x0=x0,
+                                   time=time,
+                                   time_step=time_step,
+                                   stimulation=stim,
+                                   muscle_length=stretch)
+            activeF[index_strech] = result.active_force[-1]
+            passiveF[index_strech] = result.passive_force[-1]
+            tendonF[index_strech] = result.tendon_force[-1]
+            
+        #color = colors[stim]
+        plt.plot(muscle_stretch*100/muscle.L_OPT, activeF*100/muscle.F_MAX, label = 'active')
+        plt.plot(muscle_stretch*100/muscle.L_OPT, passiveF*100/muscle.F_MAX, label = 'passive')
+        plt.plot(muscle_stretch*100/muscle.L_OPT, tendonF*100/muscle.F_MAX, label= ' tendon')
+        plt.xlabel('Contractile element length [% of L_OPT]')
+        plt.ylabel('Force [% of F_MAX]')
+        plt.title('Stimulation : {}'.format(round(stim, 2)))
+        plt.legend()
+        plt.grid()
+    
+    plt.suptitle('Isometric Muscle Experiment')
+    fig.tight_layout()
+    
+
+    
+    
+    # Fiber length influence
+    l0 = 0.11
+    l_opt_list = l0*np.arange(1,2.5,0.5)
+    for l_opt in l_opt_list:
+        muscle.L_OPT = l_opt
+        stretch_min = muscle.L_OPT
+        stretch_max = muscle.L_OPT*3
+        N_stretch = 40
+        muscle_stretch = np.arange(stretch_min, stretch_max, (stretch_max-stretch_min)/N_stretch)
+        plt.figure()
         for stretch in range (len(muscle_stretch)):
             # Run the integration
             result = sys.integrate(x0=x0,
                                    time=time,
                                    time_step=time_step,
-                                   stimulation=muscle_stimulation[stim],
+                                   stimulation=1.,
                                    muscle_length=muscle_stretch[stretch])
             activeF[stretch] = result.active_force[-1]
             passiveF[stretch] = result.passive_force[-1]
             tendonF[stretch] = result.tendon_force[-1]
-            
-        color = colors[stim]
-        plt.plot(muscle_stretch*100/muscle.L_OPT, activeF, 'o' + color)
-        plt.plot(muscle_stretch*100/muscle.L_OPT, passiveF, '+' + color)
-        plt.plot(muscle_stretch*100/muscle.L_OPT, tendonF, color, label='stim = ' + str(round(muscle_stimulation[stim], 2)))
-    
-    plt.title('Isometric muscle experiment')
-    plt.xlabel('Contractile element length [%]')
-    plt.ylabel('Force [N]')
-    plt.legend()
-    plt.grid()
-    
-    
-    # Fiber length influence
-    
+        plt.plot(muscle_stretch*100/muscle.L_OPT, activeF)
+        plt.plot(muscle_stretch*100/muscle.L_OPT, passiveF)
+        plt.plot(muscle_stretch*100/muscle.L_OPT, tendonF)
+        plt.title('l_opt = {}'.format(l_opt))
+        plt.grid()
 
 
 def exercise1d():
@@ -190,6 +220,7 @@ def exercise1d():
 
 
 def exercise1():
+
     exercise1a()
     #exercise1d()
 
