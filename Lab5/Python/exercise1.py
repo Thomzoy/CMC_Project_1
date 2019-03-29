@@ -51,8 +51,7 @@ def exercise1a():
 
     # You can still access the muscle inside the system by doing
     # >>> sys.muscle.L_OPT # To get the muscle optimal length
-
-
+    
     # Force-length curves
 
     # Evalute for various muscle stretch
@@ -115,13 +114,13 @@ def exercise1a():
     plt.suptitle('Isometric Muscle Experiment')
     fig.tight_layout()
     
-
-    
     
     # Fiber length influence
     l0 = 0.11
-    l_opt_list = l0*np.arange(1,2.5,0.5)
+    l_opt_list = l0*np.array([1,3])
     for l_opt in l_opt_list:
+        maxF = 0
+        index_maxF = 0
         muscle.L_OPT = l_opt
         stretch_min = muscle.L_OPT
         stretch_max = muscle.L_OPT*3
@@ -138,10 +137,14 @@ def exercise1a():
             activeF[stretch] = result.active_force[-1]
             passiveF[stretch] = result.passive_force[-1]
             tendonF[stretch] = result.tendon_force[-1]
-        plt.plot(muscle_stretch*100/muscle.L_OPT, activeF)
+            if activeF[stretch] > maxF:
+                maxF = activeF[stretch]
+                index_maxF = int(muscle_stretch[stretch]*100/l_opt)
+        plt.plot(muscle_stretch*100/muscle.L_OPT, activeF, label = 'Active | Max at = {}% of l_opt'.format(index_maxF))
         plt.plot(muscle_stretch*100/muscle.L_OPT, passiveF)
         plt.plot(muscle_stretch*100/muscle.L_OPT, tendonF)
         plt.title('l_opt = {}'.format(l_opt))
+        plt.legend()
         plt.grid()
 
 
