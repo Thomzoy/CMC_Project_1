@@ -127,7 +127,7 @@ class IsotonicMuscleSystem(object):
             result.l_mtc :
                 Total muscle tendon length
             result.active_force :
-                 Muscle active force
+                Muscle active force
             result.passive_force :
                 Muscle passive force
             result.tendon_force :

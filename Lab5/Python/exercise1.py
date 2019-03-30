@@ -53,7 +53,7 @@ def exercise1a():
     # >>> sys.muscle.L_OPT # To get the muscle optimal length
     
     # Force-length curves
-
+    
     # Evalute for various muscle stretch
     stretch_min = muscle.L_OPT
     stretch_max = muscle.L_OPT*2.8
@@ -61,16 +61,13 @@ def exercise1a():
     muscle_stretch = np.arange(stretch_min, stretch_max, (stretch_max-stretch_min)/N_stretch)
 
     # Evalute for various muscle stimulation
-    stim_min = 0.
-    stim_max = 1.5
     N_stim = 4
-    #muscle_stimulation = np.arange(stim_min, stim_max, (stim_max-stim_min)/N_stim)
-    muscle_stimulation = np.array([0,0.3,0.6,1])
+    muscle_stimulation = np.round(np.arange(N_stim)/(N_stim-1),2)
     # Set the initial condition
     x0 = [0.0, sys.muscle.L_OPT]
     # x0[0] --> muscle stimulation intial value
     # x0[1] --> muscle contracticle length initial value
-
+    
     # Set the time for integration
     t_start = 0.0
     t_stop = 0.2
@@ -81,14 +78,19 @@ def exercise1a():
     passiveF = np.zeros(N_stretch)
     tendonF = np.zeros(N_stretch)
     
-    # Plotting
-    n_subplot = int((np.sqrt(len(muscle_stimulation)-1))+1)
-
-    fig, axes = plt.subplots(n_subplot,n_subplot)
+    # Subplots grid
+    n_plot = len(muscle_stimulation)
+    n_subplot = int((np.sqrt(n_plot-1))+1)
+    if (n_plot<=n_subplot*(n_subplot-1)):
+        fig, axes = plt.subplots(n_subplot,n_subplot-1)
+        n_subplot2 = n_subplot-1
+    else:
+        fig, axes = plt.subplots(n_subplot,n_subplot)
+        n_subplot2 = n_subplot
 
     for i,stim in enumerate(muscle_stimulation):
-        plt.subplot(n_subplot,n_subplot,i+1)
         
+        plt.subplot(n_subplot,n_subplot2,i+1)
         
         for index_strech,stretch in enumerate(muscle_stretch):
             # Run the integration
@@ -102,31 +104,46 @@ def exercise1a():
             tendonF[index_strech] = result.tendon_force[-1]
             
         #color = colors[stim]
-        plt.plot(muscle_stretch*100/muscle.L_OPT, activeF*100/muscle.F_MAX, label = 'active')
-        plt.plot(muscle_stretch*100/muscle.L_OPT, passiveF*100/muscle.F_MAX, label = 'passive')
-        plt.plot(muscle_stretch*100/muscle.L_OPT, tendonF*100/muscle.F_MAX, label= ' tendon')
+        plt.plot(muscle_stretch*100/muscle.L_OPT, activeF*100/muscle.F_MAX, label = 'Active')
+        plt.plot(muscle_stretch*100/muscle.L_OPT, passiveF*100/muscle.F_MAX, label = 'Passive')
+        plt.plot(muscle_stretch*100/muscle.L_OPT, tendonF*100/muscle.F_MAX, label= ' Tendon')
         plt.xlabel('Contractile element length [% of L_OPT]')
-        plt.ylabel('Force [% of F_MAX]')
-        plt.title('Stimulation : {}'.format(round(stim, 2)))
+        plt.ylabel('Force [% of F_max]')
+        plt.title('Stimulation : {}'.format(stim))
         plt.legend()
         plt.grid()
     
-    plt.suptitle('Isometric Muscle Experiment')
+    plt.suptitle('Force-length curves for isometric muscle experiment with various muscle stimulations')
     fig.tight_layout()
     
     
     # Fiber length influence
+    
+    # Evalute for various optimal length
     l0 = 0.11
     l_opt_list = l0*np.array([1,3])
-    for l_opt in l_opt_list:
+    
+    # Subplots grid
+    n_plot = len(l_opt_list)
+    n_subplot = int((np.sqrt(n_plot-1))+1)
+    if (n_plot<=n_subplot*(n_subplot-1)):
+        fig, axes = plt.subplots(n_subplot,n_subplot-1)
+        n_subplot2 = n_subplot-1
+    else:
+        fig, axes = plt.subplots(n_subplot,n_subplot)
+        n_subplot2 = n_subplot
+    
+    for i,l_opt in enumerate(l_opt_list):
         maxF = 0
         index_maxF = 0
+        
+        # Evaluate for various muscle stretch
         muscle.L_OPT = l_opt
         stretch_min = muscle.L_OPT
         stretch_max = muscle.L_OPT*3
         N_stretch = 40
         muscle_stretch = np.arange(stretch_min, stretch_max, (stretch_max-stretch_min)/N_stretch)
-        plt.figure()
+        
         for stretch in range (len(muscle_stretch)):
             # Run the integration
             result = sys.integrate(x0=x0,
@@ -140,12 +157,18 @@ def exercise1a():
             if activeF[stretch] > maxF:
                 maxF = activeF[stretch]
                 index_maxF = int(muscle_stretch[stretch]*100/l_opt)
-        plt.plot(muscle_stretch*100/muscle.L_OPT, activeF, label = 'Active | Max at = {}% of l_opt'.format(index_maxF))
-        plt.plot(muscle_stretch*100/muscle.L_OPT, passiveF)
-        plt.plot(muscle_stretch*100/muscle.L_OPT, tendonF)
-        plt.title('l_opt = {}'.format(l_opt))
+                
+        plt.subplot(n_subplot,n_subplot2,i+1)
+        plt.plot(muscle_stretch*100/muscle.L_OPT, activeF, label = 'Active | max at = {}% of L_OPT'.format(index_maxF))
+        plt.plot(muscle_stretch*100/muscle.L_OPT, passiveF, label = 'Passive')
+        plt.plot(muscle_stretch*100/muscle.L_OPT, tendonF, label = 'Tendon')
+        plt.xlabel('Contractile element length [% of L_OPT]')
+        plt.ylabel('Force [% of F_max]')
+        plt.title('Optimal length : {}'.format(l_opt))
         plt.legend()
         plt.grid()
+        plt.suptitle('Force-length curves for isometric muscle experiment with various muscle optimal length')
+        fig.tight_layout()
 
 
 def exercise1d():
@@ -169,8 +192,6 @@ def exercise1d():
     # Create mass object
     mass = Mass(mass_parameters)
 
-    pylog.warning("Isotonic muscle contraction to be implemented")
-
     # Instatiate isotonic muscle system
     sys = IsotonicMuscleSystem()
 
@@ -183,12 +204,18 @@ def exercise1d():
     # You can still access the muscle inside the system by doing
     # >>> sys.muscle.L_OPT # To get the muscle optimal length
 
-    # Evalute for a single load
-    load = 100.
+    # Velocity-tension curve
+    
+    # Evalute for various loads
+    load_min = 1
+    load_max = 101
+    N_load = 20
+    load_list = np.arange(load_min, load_max, (load_max-load_min)/N_load)
 
-    # Evalute for a single muscle stimulation
-    muscle_stimulation = 1.
-
+    # Evalute for various muscle stimulation
+    N_stim = 4
+    muscle_stimulation = np.round(np.arange(N_stim)/(N_stim-1),2)
+    
     # Set the initial condition
     x0 = [0.0, sys.muscle.L_OPT,
           sys.muscle.L_OPT + sys.muscle.L_SLACK, 0.0]
@@ -202,30 +229,53 @@ def exercise1d():
     t_stop = 0.3
     time_step = 0.001
     time_stabilize = 0.2
-
     time = np.arange(t_start, t_stop, time_step)
+    
+    # Subplots grid
+    n_plot = len(muscle_stimulation)
+    n_subplot = int(np.sqrt(n_plot-1)+1)
+    if ((n_plot)<=n_subplot*(n_subplot-1)):
+        fig, axes = plt.subplots(n_subplot,n_subplot-1)
+        n_subplot2 = n_subplot-1
+    else:
+        fig, axes = plt.subplots(n_subplot,n_subplot)
+        n_subplot2 = n_subplot
 
-    # Run the integration
-    result = sys.integrate(x0=x0,
-                           time=time,
-                           time_step=time_step,
-                           time_stabilize=time_stabilize,
-                           stimulation=muscle_stimulation,
-                           load=load)
-
-    # Plotting
-    plt.figure('Isometric muscle experiment')
-    plt.plot(result.time, result.tendon_force)
-    plt.title('Isometric muscle experiment')
-    plt.xlabel('Time [s]')
-    plt.ylabel('Muscle Force')
-    plt.grid()
-
+    for i,stim in enumerate(muscle_stimulation):
+        max_velocity = np.zeros(N_load)
+        for ind_load,load in enumerate(load_list):
+            # Run the integration
+            result = sys.integrate(x0=x0,
+                                   time=time,
+                                   time_step=time_step,
+                                   time_stabilize=time_stabilize,
+                                   stimulation=stim,
+                                   load=load)
+            if (result.l_mtc[-1] < (sys.muscle.L_OPT + sys.muscle.L_SLACK)):
+                max_velocity[ind_load] = np.max(-result.v_ce)
+            else:
+                max_velocity[ind_load] = np.min(-result.v_ce)
+           
+        # Plotting
+        plt.subplot(n_subplot,n_subplot2,i+1)
+        plt.plot(max_velocity, load_list)
+        plt.plot(max_velocity[max_velocity<=0], load_list[max_velocity<=0], label='lengthening')
+        plt.plot(max_velocity[max_velocity>=0], load_list[max_velocity>=0], label='shortening')
+        plt.axvline(linewidth=1, linestyle='--', color='r')
+        plt.xlabel('Velocity_max [m/s]')
+        plt.ylabel('Load [kg]')
+        plt.title('Stimulation : {}'.format(stim))
+        plt.legend()
+        plt.grid()
+    
+    plt.suptitle('Velocity-tension curves for isotonic muscle experiment with various muscle stimulation')
+    fig.tight_layout()
+                
 
 def exercise1():
 
-    exercise1a()
-    #exercise1d()
+    #exercise1a()
+    exercise1d()
 
     if DEFAULT["save_figures"] is False:
         plt.show()
@@ -237,7 +287,6 @@ def exercise1():
             plt.figure(fig)
             save_figure(fig)
             plt.close(fig)
-
 
 if __name__ == '__main__':
     from cmcpack import parse_args
