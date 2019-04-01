@@ -283,7 +283,6 @@ def exercise1c():
     
 def exercise1d():
     """ Exercise 1d
-
     Under isotonic conditions external load is kept constant.
     A constant stimulation is applied and then suddenly the muscle
     is allowed contract. The instantaneous velocity at which the muscle
@@ -318,8 +317,8 @@ def exercise1d():
     
     # Evalute for various loads
     load_min = 1
-    load_max = 101
-    N_load = 20
+    load_max = 301
+    N_load = 50
     load_list = np.arange(load_min, load_max, (load_max-load_min)/N_load)
 
     # Evalute for various muscle stimulation
@@ -353,6 +352,9 @@ def exercise1d():
 
     for i,stim in enumerate(muscle_stimulation):
         max_velocity = np.zeros(N_load)
+        activeF = np.zeros(N_load)
+        passiveF = np.zeros(N_load)
+        tendonF = np.zeros(N_load)
         for ind_load,load in enumerate(load_list):
             # Run the integration
             result = sys.integrate(x0=x0,
@@ -365,20 +367,21 @@ def exercise1d():
                 max_velocity[ind_load] = np.max(-result.v_ce)
             else:
                 max_velocity[ind_load] = np.min(-result.v_ce)
-           
+            tendonF[ind_load] = result.tendon_force[-1]
+            
         # Plotting
         plt.subplot(n_subplot,n_subplot2,i+1)
-        plt.plot(max_velocity, load_list)
-        plt.plot(max_velocity[max_velocity<=0], load_list[max_velocity<=0], label='lengthening')
-        plt.plot(max_velocity[max_velocity>=0], load_list[max_velocity>=0], label='shortening')
+        plt.plot(max_velocity*100/-muscle.V_MAX, tendonF*100/muscle.F_MAX, 'k', label='Tendon force')
+        plt.plot(max_velocity[max_velocity<=0]*100/-muscle.V_MAX, tendonF[max_velocity<=0]*100/muscle.F_MAX, 'b', label='lengthening')
+        plt.plot(max_velocity[max_velocity>=-0]*100/-muscle.V_MAX, tendonF[max_velocity>=0]*100/muscle.F_MAX,'r',  label='shortening')
         plt.axvline(linewidth=1, linestyle='--', color='r')
-        plt.xlabel('Velocity_max [m/s]')
-        plt.ylabel('Load [kg]')
+        plt.xlabel('Velocity_max [% of V_MAX]')
+        plt.ylabel('Tendon force [% of F_MAX]')
         plt.title('Stimulation : {}'.format(stim))
         plt.legend()
         plt.grid()
     
-    plt.suptitle('Velocity-tension curves for isotonic muscle experiment with various muscle stimulation')
+    plt.suptitle('Velocity-tension curves for isotonic muscle experiment with various muscle stimulations')
     fig.tight_layout()
                 
 
