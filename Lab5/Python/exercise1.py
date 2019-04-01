@@ -26,12 +26,7 @@ plt.rc('ytick', labelsize=14.0)    # fontsize of the tick labels
 DEFAULT["save_figures"] = True
 
 def exercise1a():
-    """ Exercise 1a
-    The goal of this exercise is to understand the relationship
-    between muscle length and tension.
-    Here you will re-create the isometric muscle contraction experiment.
-    To do so, you will have to keep the muscle at a constant length and
-    observe the force while stimulating the muscle at a constant activation."""
+    """ Exercise 1a """
 
     # Defination of muscles
     parameters = MuscleParameters()
@@ -48,9 +43,6 @@ def exercise1a():
     # Add the muscle to the system
     sys.add_muscle(muscle)
 
-    # You can still access the muscle inside the system by doing
-    # >>> sys.muscle.L_OPT # To get the muscle optimal length
-    
     # Force-length curves
     
     # Evalute for various muscle stretch
@@ -87,18 +79,13 @@ def exercise1a():
         tendonF[index_strech] = result.tendon_force[-1]
         lceF[index_strech] = result.l_ce[-1]
         
-    #color = colors[stim]
-    """
-    plt.plot(muscle_stretch*100/muscle.L_OPT, activeF*100/muscle.F_MAX, label = 'Active')
-    plt.plot(muscle_stretch*100/muscle.L_OPT, passiveF*100/muscle.F_MAX, label = 'Passive')
-    plt.plot(muscle_stretch*100/muscle.L_OPT, tendonF*100/muscle.F_MAX, label= ' Tendon')
-    """
     plt.plot(lceF*100/muscle.L_OPT, activeF*100/muscle.F_MAX, label = 'Active')
     plt.plot(lceF*100/muscle.L_OPT, passiveF*100/muscle.F_MAX, label = 'Passive')
     plt.plot(lceF*100/muscle.L_OPT, tendonF*100/muscle.F_MAX, label= ' Tendon')
 
     plt.axvline(100,linewidth=1, linestyle='--', color='r')
     plt.axvline(145,linewidth=1, linestyle='--', color='r')
+    
     plt.xlabel('Contractile element length [% of $L_{opt}$]')
     plt.ylabel('Force [% of $F_{max}$]')
     plt.title('Force-length curves for isometric muscle experiment (Stimulation : 1.0)')
@@ -106,13 +93,8 @@ def exercise1a():
     plt.grid()
 
 
-def exercise1b_color():
-    """ Exercise 1a
-    The goal of this exercise is to understand the relationship
-    between muscle length and tension.
-    Here you will re-create the isometric muscle contraction experiment.
-    To do so, you will have to keep the muscle at a constant length and
-    observe the force while stimulating the muscle at a constant activation."""
+def exercise1b():
+    """ Exercise 1b """
 
     # Defination of muscles
     parameters = MuscleParameters()
@@ -128,9 +110,6 @@ def exercise1b_color():
 
     # Add the muscle to the system
     sys.add_muscle(muscle)
-
-    # You can still access the muscle inside the system by doing
-    # >>> sys.muscle.L_OPT # To get the muscle optimal length
     
     # Force-length curves
     
@@ -140,7 +119,7 @@ def exercise1b_color():
     N_stretch = 40
     muscle_stretch = np.arange(stretch_min, stretch_max, (stretch_max-stretch_min)/N_stretch)
 
-    # Evalute for various muscle stimulation
+    # Evaluate for various muscle stimulation
     N_stim = 6
     muscle_stimulation = np.round(np.arange(N_stim)/(N_stim-1),2)
    
@@ -151,7 +130,7 @@ def exercise1b_color():
     
     # Set the time for integration
     t_start = 0.0
-    t_stop = 0.5
+    t_stop = 0.3
     time_step = 0.001
     time = np.arange(t_start, t_stop, time_step)
     
@@ -167,8 +146,7 @@ def exercise1b_color():
     for stim in range (len(muscle_stimulation)):
         pylog.info('Stimulation = {}'.format(stim))
         activeF = np.zeros(N_stretch)
-        tendonF = np.zeros(N_stretch)
-        index_acti_max = 0        
+        tendonF = np.zeros(N_stretch)       
         for stretch in range (len(muscle_stretch)):
             # Run the integration
             result = sys.integrate(x0=x0,
@@ -176,21 +154,16 @@ def exercise1b_color():
                                    time_step=time_step,
                                    stimulation=muscle_stimulation[stim],
                                    muscle_length=muscle_stretch[stretch])
-            activeF[stretch] = result.active_force[-1]/muscle.F_MAX
-            if(activeF[stretch]>activeF[index_acti_max]):
-                index_acti_max = stretch
+            activeF[stretch] = result.active_force[-1]
             if(stim==0):
-                passiveF[stretch] = result.passive_force[-1]/muscle.F_MAX
-            tendonF[stretch] = result.tendon_force[-1]/muscle.F_MAX
+                passiveF[stretch] = result.passive_force[-1]
+            tendonF[stretch] = result.tendon_force[-1]
             lceF[stretch] = result.l_ce[-1]
         
         color = colors[stim]
-        #plt.plot(muscle_stretch*100/muscle.L_OPT, activeF, 'o' + color)
-        #plt.plot(muscle_stretch*100/muscle.L_OPT, passiveF, '+' + color)
-       
-        plt.plot(lceF*100/muscle.L_OPT, activeF, color, label='Active Force - Stim = ' + str(round(muscle_stimulation[stim], 2)))
+        plt.plot(lceF*100/muscle.L_OPT, 100*activeF/muscle.F_MAX, color, label='Active Force - Stim = ' + str(round(muscle_stimulation[stim], 2)))
 
-    plt.plot(lceF*100/muscle.L_OPT, passiveF, '+' + 'k', label='Passive Force')
+    plt.plot(lceF*100/muscle.L_OPT, 100*passiveF/muscle.F_MAX, '+' + 'k', label='Passive Force')
     plt.title('Isometric Muscle Experiment')
     plt.xlabel('Contractile element length [% of $l_{opt}$]')
     plt.ylabel('Force [% of $F_{max}$]')
@@ -198,7 +171,7 @@ def exercise1b_color():
     plt.grid()
     
 def exercise1c():
-
+    """ Exercice 1c """
 
     # Defination of muscles
     parameters = MuscleParameters()
@@ -234,8 +207,8 @@ def exercise1c():
     tendonF = np.zeros(N_stretch)
     lceF = np.zeros(N_stretch)
     
-    # Evalute for various optimal length
-    l0 = 0.11
+    # Evaluate for various optimal length
+    l0 = muscle.L_OPT
     l_opt_list = l0*np.array([1,3])
     
     # Subplots grid
@@ -263,18 +236,17 @@ def exercise1c():
                                    time_step=time_step,
                                    stimulation=1.,
                                    muscle_length=muscle_stretch[stretch])
-            activeF[stretch] = result.active_force[-1]/muscle.F_MAX
-            passiveF[stretch] = result.passive_force[-1]/muscle.F_MAX
-            tendonF[stretch] = result.tendon_force[-1]/muscle.F_MAX
+            activeF[stretch] = result.active_force[-1]
+            passiveF[stretch] = result.passive_force[-1]
+            tendonF[stretch] = result.tendon_force[-1]
             lceF[stretch] = result.l_ce[-1]
-                
+               
         plt.subplot(n_subplot,n_subplot2,i+1)
-        plt.plot(lceF, 100*activeF, label = 'Active')
-        plt.plot(lceF, 100*passiveF, label = 'Passive')
-        plt.plot(lceF, 100*tendonF, label = 'Tendon')
+        plt.plot(lceF/l_opt, activeF, label = 'Active')
+        plt.plot(lceF/l_opt, passiveF, label = 'Passive')
+        plt.plot(lceF/l_opt, tendonF, label = 'Tendon')
         plt.xlabel('Contractile element length')
-        plt.ylabel('Force [% of F_max]')
-        plt.ylim([0,200])
+        plt.ylabel('Force [% of $F_{max}$]')
         plt.title('Optimal length : {}'.format(l_opt))
         plt.legend()
         plt.grid()
@@ -352,8 +324,6 @@ def exercise1d():
 
     for i,stim in enumerate(muscle_stimulation):
         max_velocity = np.zeros(N_load)
-        activeF = np.zeros(N_load)
-        passiveF = np.zeros(N_load)
         tendonF = np.zeros(N_load)
         for ind_load,load in enumerate(load_list):
             # Run the integration
@@ -375,8 +345,8 @@ def exercise1d():
         plt.plot(max_velocity[max_velocity<=0]*100/-muscle.V_MAX, tendonF[max_velocity<=0]*100/muscle.F_MAX, 'b', label='lengthening')
         plt.plot(max_velocity[max_velocity>=-0]*100/-muscle.V_MAX, tendonF[max_velocity>=0]*100/muscle.F_MAX,'r',  label='shortening')
         plt.axvline(linewidth=1, linestyle='--', color='r')
-        plt.xlabel('Velocity_max [% of V_MAX]')
-        plt.ylabel('Tendon force [% of F_MAX]')
+        plt.xlabel('Max velocity [% of $v_{max}$]')
+        plt.ylabel('Tendon force [% of $F_{max}$]')
         plt.title('Stimulation : {}'.format(stim))
         plt.legend()
         plt.grid()
@@ -389,10 +359,22 @@ def exercise1():
 
     #exercise1a()
     #exercise1b()
-    #exercise1b_color()
-    exercise1c()
+    #exercise1c()
     #exercise1d()
-
+    if DEFAULT["1a"] is True:
+        exercise1a()
+    elif DEFAULT["1b"] is True:
+        exercise1b()
+    elif DEFAULT["1c"] is True:
+        exercise1c()  
+    elif DEFAULT["1d"] is True:
+        exercise1c()          
+    else :
+        exercise1a()
+        exercise1b()
+        exercise1c()
+        exercise1d()
+        
     if DEFAULT["save_figures"] is False:
         plt.show()
     else:
