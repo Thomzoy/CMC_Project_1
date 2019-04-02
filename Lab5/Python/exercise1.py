@@ -308,7 +308,7 @@ def exercise1d():
     # x0[1] - -> contractile length(l_ce)
     # x0[2] - -> position of the mass/load
     # x0[3] - -> velocity of the mass/load
-    print(sys.muscle.V_MAX)
+    
     # Set the time for integration
     t_start = 0.0
     t_stop = 0.3
