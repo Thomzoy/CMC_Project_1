@@ -436,7 +436,6 @@ def exercise1f():
     plt.title('Velocity-tension curves for isotonic muscle experiment with various muscle stimulations')
     plt.legend()
     plt.grid()
-    #Test
 
 
 def exercise1():
