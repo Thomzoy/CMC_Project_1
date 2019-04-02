@@ -54,12 +54,19 @@ def parse_args(**kwargs):
         dest="exo_1d",
         action="store_true"   
     )    
+    parser.add_argument(
+        "--1f",
+        help="Run only exercise 1f",
+        dest="exo_1f",
+        action="store_true"   
+    )    
     args = parser.parse_args()
     DEFAULT["save_figures"] = args.save_figures
     DEFAULT["1a"] = args.exo_1a
     DEFAULT["1b"] = args.exo_1b
     DEFAULT["1c"] = args.exo_1c
     DEFAULT["1d"] = args.exo_1d
+    DEFAULT["1f"] = args.exo_1f
 
     if args.extension:
         DEFAULT["save_extensions"] = args.extension
