@@ -250,7 +250,7 @@ def exercise1c():
         plt.plot(lceF/l_opt, tendonF, label = 'Tendon Force')
         plt.xlabel('Contractile element length')
         plt.ylabel('Force [% of $F_{max}$]')
-        plt.title('Optimal length = {}'.format(l_opt))
+        plt.title('Optimal length = {} [m]'.format(l_opt))
         plt.legend()
         plt.grid()
         
@@ -308,7 +308,7 @@ def exercise1d():
     # x0[1] - -> contractile length(l_ce)
     # x0[2] - -> position of the mass/load
     # x0[3] - -> velocity of the mass/load
-
+    print(sys.muscle.V_MAX)
     # Set the time for integration
     t_start = 0.0
     t_stop = 0.3
@@ -334,14 +334,15 @@ def exercise1d():
             
     # Plotting
     plt.figure('Isotonic Muscle Experiment 1d')
-    plt.plot(max_velocity*100/-muscle.V_MAX, tendonF*100/muscle.F_MAX, 'k', label='Tendon Force')
-    plt.plot(max_velocity[max_velocity<=0]*100/-muscle.V_MAX, tendonF[max_velocity<=0]*100/muscle.F_MAX, 'b', label='Lengthening')
-    plt.plot(max_velocity[max_velocity>=-0]*100/-muscle.V_MAX, tendonF[max_velocity>=0]*100/muscle.F_MAX,'r',  label='Shortening')
-    plt.axvline(linewidth=1, linestyle='--', color='r')
-    plt.xlabel('Max velocity [% of $V_{max}$]')
+    v_min = np.amin(max_velocity)
+    v_max = np.amax(max_velocity)
+    plt.plot(max_velocity*100/-muscle.V_MAX, tendonF*100/muscle.F_MAX)
+    plt.axvline(linestyle='--', color='r', linewidth=2)
+    plt.text(v_min*100/-muscle.V_MAX, 20, r'lengthening', fontsize=14)
+    plt.text(v_max*100/-muscle.V_MAX*1/3, 20, r'shortening', fontsize=14)
+    plt.xlabel('Maximal velocity [% of $V_{max}$]')
     plt.ylabel('Tendon Force [% of $F_{max}$]')
     plt.title('Velocity-tension curve for isotonic muscle experiment (Stimulation = 1.0)')
-    plt.legend()
     plt.grid()
 
     
@@ -372,12 +373,12 @@ def exercise1f():
 
     # You can still access the muscle inside the system by doing
     # >>> sys.muscle.L_OPT # To get the muscle optimal length
-
+    
     # Velocity-tension curve
     
     # Evalute for various loads
     load_min = 1
-    load_max = 301
+    load_max = 501
     N_load = 50
     load_list = np.arange(load_min, load_max, (load_max-load_min)/N_load)
 
@@ -399,20 +400,12 @@ def exercise1f():
     time_step = 0.001
     time_stabilize = 0.2
     time = np.arange(t_start, t_stop, time_step)
-    
-    # Subplots grid
-    n_plot = len(muscle_stimulation)
-    n_subplot = int(np.sqrt(n_plot-1)+1)
-    if ((n_plot)<=n_subplot*(n_subplot-1)):
-        fig, axes = plt.subplots(n_subplot,n_subplot-1)
-        n_subplot2 = n_subplot-1
-    else:
-        fig, axes = plt.subplots(n_subplot,n_subplot)
-        n_subplot2 = n_subplot
 
+    max_velocity = np.zeros((N_stim, N_load))
+    tendonF = np.zeros((N_stim, N_load))
+        
     for i,stim in enumerate(muscle_stimulation):
-        max_velocity = np.zeros(N_load)
-        tendonF = np.zeros(N_load)
+        
         for ind_load,load in enumerate(load_list):
             # Run the integration
             result = sys.integrate(x0=x0,
@@ -422,26 +415,28 @@ def exercise1f():
                                    stimulation=stim,
                                    load=load)
             if (result.l_mtc[-1] < (sys.muscle.L_OPT + sys.muscle.L_SLACK)):
-                max_velocity[ind_load] = np.max(-result.v_ce)
+                max_velocity[i, ind_load] = np.max(-result.v_ce)
             else:
-                max_velocity[ind_load] = np.min(-result.v_ce)
-            tendonF[ind_load] = result.tendon_force[-1]
+                max_velocity[i, ind_load] = np.min(-result.v_ce)
+            tendonF[i, ind_load] = result.tendon_force[-1]
             
-        # Plotting
-        plt.subplot(n_subplot,n_subplot2,i+1)
-        plt.plot(max_velocity*100/-muscle.V_MAX, tendonF*100/muscle.F_MAX, 'k', label='Tendon Force')
-        plt.plot(max_velocity[max_velocity<=0]*100/-muscle.V_MAX, tendonF[max_velocity<=0]*100/muscle.F_MAX, 'b', label='Lengthening')
-        plt.plot(max_velocity[max_velocity>=-0]*100/-muscle.V_MAX, tendonF[max_velocity>=0]*100/muscle.F_MAX,'r',  label='Shortening')
-        plt.axvline(linewidth=1, linestyle='--', color='r')
-        plt.xlabel('Max velocity [% of $V_{max}$]')
-        plt.ylabel('Tendon Force [% of $F_{max}$]')
-        plt.title('Stimulation = {}'.format(stim))
-        plt.legend()
-        plt.grid()
-    
-    plt.suptitle('Velocity-tension curves for isotonic muscle experiment with various muscle stimulations')
-    fig.tight_layout()
-                
+    # Plotting
+    plt.figure('Isotonic Muscle Experiment 1f')
+    v_min = np.amin(max_velocity)
+    v_max = np.amax(max_velocity)
+    for i,stim in enumerate(muscle_stimulation):
+        plt.plot(max_velocity[i,:]*100/-muscle.V_MAX, tendonF[i,:]*100/muscle.F_MAX, label='Tendon Force - Stimulation = {}'.format(stim))
+        plt.xlim(v_min*100/-muscle.V_MAX, v_max*100/-muscle.V_MAX)
+        plt.ylim(0,200)
+    plt.axvline(linestyle='--', color='r', linewidth=2)
+    plt.text(v_min*100/-muscle.V_MAX*2/3, 170, r'lengthening', fontsize=16)
+    plt.text(v_max*100/-muscle.V_MAX*1/8, 170, r'shortening', fontsize=16)
+    plt.xlabel('Maximal velocity [% of $V_{max}$]')
+    plt.ylabel('Tendon Force [% of $F_{max}$]')
+    plt.title('Velocity-tension curves for isotonic muscle experiment with various muscle stimulations')
+    plt.legend()
+    plt.grid()
+
 
 def exercise1():
 
