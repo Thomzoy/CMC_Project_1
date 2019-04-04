@@ -211,8 +211,7 @@ def exercise1c():
     lceF = np.zeros(N_stretch)
     
     # Evaluate for various optimal length
-    l0 = muscle.L_OPT
-    l_opt_list = l0*np.array([1,3])
+    l_opt_list = np.array([0.1,0.3])
     
     # Subplots grid
     n_plot = len(l_opt_list)
@@ -245,9 +244,12 @@ def exercise1c():
             lceF[stretch] = result.l_ce[-1]
                
         plt.subplot(n_subplot,n_subplot2,i+1)
-        plt.plot(lceF/l_opt, activeF, label = 'Active Force')
-        plt.plot(lceF/l_opt, passiveF, label = 'Passive Force')
-        plt.plot(lceF/l_opt, tendonF, label = 'Tendon Force')
+        plt.plot(lceF, 100*activeF/muscle.F_MAX, label = 'Active Force')
+        plt.plot(lceF, 100*passiveF/muscle.F_MAX, label = 'Passive Force')
+        plt.plot(lceF, 100*tendonF/muscle.F_MAX, label = 'Tendon Force')
+        plt.axvline(l_opt, linestyle = "--",color = "r")
+        plt.xlim([l_opt-0.3,l_opt+0.3])
+        plt.ylim([0,120])
         plt.xlabel('Contractile element length')
         plt.ylabel('Force [% of $F_{max}$]')
         plt.title('Optimal length = {} [m]'.format(l_opt))
