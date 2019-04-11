@@ -93,6 +93,7 @@ def exercise2():
     plt.ylabel('Muscle length [m]')
     plt.legend(leg)
     plt.grid()
+    plt.savefig('2_a_length.png')
     
     plt.figure('2a moment')
     plt.title('Moment arm over M1 with respect to the position of the limb')
@@ -102,7 +103,7 @@ def exercise2():
     plt.ylabel('Moment arm [m]')
     plt.legend(leg)
     plt.grid()
-    plt.savefig('2_a.png')
+    plt.savefig('2_a_moment.png')
     
     
     # 2b : simple activation wave forms
@@ -270,7 +271,7 @@ def exercise2():
     plt.grid()
     plt.xlabel('Stimulation Frequency in Hz')
     plt.ylabel('Pendulum Oscillation Amplitude [rad]')
-    plt.save('2c_frequency')
+    plt.savefig('2c_frequency.png')
     plt.show()
 
     # Effect of amplitude
@@ -318,7 +319,7 @@ def exercise2():
     plt.grid()
     plt.xlabel('Stimulation Amplitude')
     plt.ylabel('Pendulum Oscillation Amplitude [rad]')
-    plt.save('2c_amplitude')
+    plt.savefig('2c_amplitude.png')
     plt.show()
     
     
