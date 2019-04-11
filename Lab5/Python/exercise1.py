@@ -79,6 +79,7 @@ def exercise1a():
         tendonF[index_strech] = result.tendon_force[-1]
         lceF[index_strech] = result.l_ce[-1]
     
+    # Plotting
     plt.figure('Isometric Muscle Experiment 1a')
     
     plt.plot(lceF*100/muscle.L_OPT, activeF*100/muscle.F_MAX, label = 'Active Force')
@@ -127,8 +128,6 @@ def exercise1b():
    
     # Set the initial condition
     x0 = [0.0, sys.muscle.L_OPT]
-    # x0[0] --> muscle stimulation intial value
-    # x0[1] --> muscle contracticle length initial value
     
     # Set the time for integration
     t_start = 0.0
@@ -195,8 +194,6 @@ def exercise1c():
    
     # Set the initial condition
     x0 = [0.0, sys.muscle.L_OPT]
-    # x0[0] --> muscle stimulation intial value
-    # x0[1] --> muscle contractile length initial value
     
     # Set the time for integration
     t_start = 0.0
@@ -372,9 +369,6 @@ def exercise1f():
 
     # Add the mass to the system
     sys.add_mass(mass)
-
-    # You can still access the muscle inside the system by doing
-    # >>> sys.muscle.L_OPT # To get the muscle optimal length
     
     # Velocity-tension curve
     
@@ -391,10 +385,6 @@ def exercise1f():
     # Set the initial condition
     x0 = [0.0, sys.muscle.L_OPT,
           sys.muscle.L_OPT + sys.muscle.L_SLACK, 0.0]
-    # x0[0] - -> activation
-    # x0[1] - -> contractile length(l_ce)
-    # x0[2] - -> position of the mass/load
-    # x0[3] - -> velocity of the mass/load
 
     # Set the time for integration
     t_start = 0.0
@@ -426,10 +416,12 @@ def exercise1f():
     plt.figure('Isotonic Muscle Experiment 1f')
     v_min = np.amin(max_velocity)
     v_max = np.amax(max_velocity)
+    
     for i,stim in enumerate(muscle_stimulation):
         plt.plot(max_velocity[i,:]*100/-muscle.V_MAX, tendonF[i,:]*100/muscle.F_MAX, label='Tendon Force - Stimulation = {}'.format(stim))
         plt.xlim(v_min*100/-muscle.V_MAX, v_max*100/-muscle.V_MAX)
         plt.ylim(0,200)
+        
     plt.axvline(linestyle='--', color='r', linewidth=2)
     plt.text(v_min*100/-muscle.V_MAX*2/3, 170, r'lengthening', fontsize=16)
     plt.text(v_max*100/-muscle.V_MAX*1/8, 170, r'shortening', fontsize=16)
